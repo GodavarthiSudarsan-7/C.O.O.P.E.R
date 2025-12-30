@@ -7,35 +7,34 @@ import scipy.io.wavfile as wav
 import pyttsx3
 import tempfile
 
-# ---------- FFmpeg (Windows) ----------
 os.environ["PATH"] += os.pathsep + r"C:\Users\sudu6\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg.Essentials_Microsoft.WinGet.Source_8wekyb3d8bbwe\ffmpeg-8.0.1-essentials_build\bin"
 
-# ---------- Text-to-Speech ----------
-engine = pyttsx3.init(driverName="sapi5")
-engine.setProperty("rate", 160)
-engine.setProperty("volume", 1.0)
-voices = engine.getProperty("voices")
-engine.setProperty("voice", voices[0].id)
-
-# ---------- Whisper ----------
 model = whisper.load_model("tiny")
+
+
+def _init_tts():
+    engine = pyttsx3.init(driverName="sapi5")
+    engine.setProperty("rate", 155)
+    engine.setProperty("volume", 1.0)
+    voices = engine.getProperty("voices")
+    engine.setProperty("voice", voices[0].id)
+    return engine
 
 
 def speak(text: str):
     print(f"COOPER: {text}")
     sd.stop()
+    time.sleep(0.2)
+    engine = _init_tts()
     engine.say(text)
     engine.runAndWait()
-    time.sleep(0.5)
+    engine.stop()
+    time.sleep(0.3)
 
 
 def listen(duration: int = 6) -> str:
-    """
-    High-clarity voice capture tuned for Whisper.
-    """
     fs = 16000
     print("[COOPER] Listening...")
-
     sd.stop()
 
     recording = sd.rec(
@@ -46,7 +45,6 @@ def listen(duration: int = 6) -> str:
     )
     sd.wait()
 
-    # Normalize volume
     peak = np.max(np.abs(recording))
     if peak > 0:
         recording = recording / peak
@@ -59,10 +57,9 @@ def listen(duration: int = 6) -> str:
         result = model.transcribe(
             audio_path,
             language="en",
-            temperature=0.0,        # deterministic
+            temperature=0.0,
             fp16=False,
-            condition_on_previous_text=False,
-            no_speech_threshold=0.5
+            condition_on_previous_text=False
         )
         text = result.get("text", "").strip()
     finally:
