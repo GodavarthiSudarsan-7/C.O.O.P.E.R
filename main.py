@@ -10,6 +10,7 @@ from cooper.actions import (
     system_power,
 )
 from cooper.ai_answer import answer_question
+from cooper.personality import acknowledge, done, confirm_power
 
 
 def get_user_input():
@@ -45,16 +46,27 @@ def main():
             intent = get_intent(user_input)
 
             if intent["action"] == "open_website":
+                speak(acknowledge())
                 open_website(intent["target"])
+                speak(done())
 
             elif intent["action"] == "open_application":
+                speak(acknowledge())
                 open_application(intent["target"])
+                speak(done())
 
             elif intent["action"] == "system_volume":
+                speak(acknowledge())
                 system_volume(intent["target"])
+                speak(done())
 
             elif intent["action"] == "system_power":
-                system_power(intent["target"])
+                speak(confirm_power())
+                confirm = get_user_input().lower()
+                if "yes" in confirm:
+                    system_power(intent["target"])
+                else:
+                    speak("Action cancelled.")
 
             else:
                 answer = answer_question(user_input)

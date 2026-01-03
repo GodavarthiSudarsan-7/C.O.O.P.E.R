@@ -1,5 +1,5 @@
-def rule_intent(command: str):
-    text = command.lower()
+def rule_intent(text: str):
+    text = text.lower()
 
     if "open google" in text:
         return {"action": "open_website", "target": "https://www.google.com"}
@@ -7,16 +7,22 @@ def rule_intent(command: str):
     if "open youtube" in text:
         return {"action": "open_website", "target": "https://www.youtube.com"}
 
-    if "open calculator" in text:
+    if "open github" in text:
+        return {"action": "open_website", "target": "https://www.github.com"}
+
+    if "open calculator" in text or "open calc" in text:
         return {"action": "open_application", "target": "calculator"}
 
     if "open notepad" in text:
         return {"action": "open_application", "target": "notepad"}
 
-    if "increase volume" in text or "volume up" in text:
+    if "open chrome" in text:
+        return {"action": "open_application", "target": "chrome"}
+
+    if "volume up" in text or "increase volume" in text:
         return {"action": "system_volume", "target": "up"}
 
-    if "decrease volume" in text or "volume down" in text:
+    if "volume down" in text or "decrease volume" in text:
         return {"action": "system_volume", "target": "down"}
 
     if "mute volume" in text or "mute system" in text:
