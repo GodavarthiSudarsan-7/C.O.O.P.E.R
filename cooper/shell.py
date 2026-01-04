@@ -1,8 +1,13 @@
-import threading
-import tkinter as tk
-from tkinter.scrolledtext import ScrolledText
+from PySide6.QtWidgets import (
+    QApplication,
+    QWidget,
+    QVBoxLayout,
+    QTextEdit,
+    QLineEdit
+)
+import sys
 
-from cooper.voice import speak, listen
+from cooper.voice import speak
 from cooper.utils import clean_input, normalize_command
 from cooper.intent_router import get_intent
 from cooper.actions import (
@@ -15,85 +20,95 @@ from cooper.ai_answer import answer_question
 from cooper.personality import acknowledge, done, confirm_power
 
 
-class CooperShell:
+class CooperShell(QWidget):
     def __init__(self):
-        self.root = tk.Tk()
-        self.root.title("COOPER Shell")
-        self.root.geometry("700x500")
+        super().__init__()
 
-        self.output = ScrolledText(self.root, state="disabled", wrap=tk.WORD)
-        self.output.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.setWindowTitle("COOPER Shell")
+        self.resize(800, 500)
 
-        self.input = tk.Entry(self.root)
-        self.input.pack(fill=tk.X, padx=10, pady=(0, 10))
-        self.input.bind("<Return>", self.handle_text_input)
+        layout = QVBoxLayout(self)
 
-        self.write("COOPER is online. Ready when you are.")
-        speak("COOPER is online. Ready when you are.")
+        self.output = QTextEdit()
+        self.output.setReadOnly(True)
+        layout.addWidget(self.output)
 
-        threading.Thread(target=self.voice_loop, daemon=True).start()
+        self.input = QLineEdit()
+        self.input.setPlaceholderText("Type a command and press Enter…")
+        self.input.returnPressed.connect(self.handle_input)
+        layout.addWidget(self.input)
+
+        self.write("Initialization complete. COOPER is ready, Boss..")
+        speak("Initialization complete. COOPER is ready, Boss..")
+
+        self.input.setFocus()
 
     def write(self, text):
-        self.output.config(state="normal")
-        self.output.insert(tk.END, text + "\n")
-        self.output.see(tk.END)
-        self.output.config(state="disabled")
+        self.output.append(text)
 
-    def handle_text_input(self, event=None):
-        text = self.input.get().strip()
-        self.input.delete(0, tk.END)
-        if text:
-            self.write(f"YOU: {text}")
-            self.process_command(text)
+    def handle_input(self):
+        text = self.input.text().strip()
+        self.input.clear()
 
-    def voice_loop(self):
-        while True:
-            voice = listen()
-            if voice:
-                self.write(f"YOU (voice): {voice}")
-                self.process_command(voice)
+        if not text:
+            return
+
+        self.write(f"YOU: {text}")
+        self.process_command(text)
+        self.input.setFocus()
 
     def process_command(self, text):
         text = normalize_command(clean_input(text.lower()))
 
         if text in ("exit", "quit", "stop cooper"):
-            speak("Shutting down. Goodbye.")
-            self.root.quit()
+            self.write("COOPER: Shutting down.")
+            speak("Shutting down. Goodbye boss.")
+            QApplication.quit()
             return
 
         intent = get_intent(text)
 
         if intent["action"] == "open_website":
-            speak(acknowledge())
+            msg = acknowledge()
+            self.write(f"COOPER: {msg}")
+            speak(msg)
             open_website(intent["target"])
-            speak(done())
+            msg = done()
+            self.write(f"COOPER: {msg}")
+            speak(msg)
 
         elif intent["action"] == "open_application":
-            speak(acknowledge())
+            msg = acknowledge()
+            self.write(f"COOPER: {msg}")
+            speak(msg)
             open_application(intent["target"])
-            speak(done())
+            msg = done()
+            self.write(f"COOPER: {msg}")
+            speak(msg)
 
         elif intent["action"] == "system_volume":
-            speak(acknowledge())
+            msg = acknowledge()
+            self.write(f"COOPER: {msg}")
+            speak(msg)
             system_volume(intent["target"])
-            speak(done())
+            msg = done()
+            self.write(f"COOPER: {msg}")
+            speak(msg)
 
         elif intent["action"] == "system_power":
-            speak(confirm_power())
-            confirm = listen().lower()
-            if "yes" in confirm:
-                system_power(intent["target"])
-            else:
-                speak("Action cancelled.")
+            msg = confirm_power()
+            self.write(f"COOPER: {msg}")
+            speak(msg)
+            system_power(intent["target"])
 
         else:
             answer = answer_question(text)
             self.write(f"COOPER: {answer}")
             speak(answer)
 
-    def run(self):
-        self.root.mainloop()
-
 
 def run_shell():
-    CooperShell().run()
+    app = QApplication(sys.argv)
+    window = CooperShell()
+    window.show()
+    sys.exit(app.exec())
