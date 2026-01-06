@@ -38,8 +38,8 @@ class CooperShell(QWidget):
         self.input.returnPressed.connect(self.handle_input)
         layout.addWidget(self.input)
 
-        self.write("Initialization complete. COOPER is ready, Boss..")
-        speak("Initialization complete. COOPER is ready, Boss..")
+        self.write("Initialization complete. COOPER is ready, Boss.")
+        speak("Initialization complete. COOPER is ready, Boss.")
 
         self.input.setFocus()
 
@@ -102,9 +102,23 @@ class CooperShell(QWidget):
             system_power(intent["target"])
 
         else:
-            answer = answer_question(text)
-            self.write(f"COOPER: {answer}")
-            speak(answer)
+            try:
+                from cooper.planner import plan_steps
+                from cooper.executor import execute_steps
+
+                self.write("COOPER: Planning steps.")
+                speak("Let me think.")
+
+                steps = plan_steps(text)
+                execute_steps(steps)
+
+                self.write("COOPER: Done.")
+                speak("Done.")
+
+            except Exception:
+                answer = answer_question(text)
+                self.write(f"COOPER: {answer}")
+                speak(answer)
 
 
 def run_shell():
