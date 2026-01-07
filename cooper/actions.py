@@ -35,8 +35,15 @@ def open_application(app_name: str):
 
 def google_search(query: str):
     speak(f"Searching Google for {query}.")
-    encoded_query = urllib.parse.quote_plus(query)
-    url = f"https://www.google.com/search?q={encoded_query}"
+    encoded = urllib.parse.quote_plus(query)
+    url = f"https://www.google.com/search?q={encoded}"
+    webbrowser.open(url)
+
+
+def youtube_search(query: str):
+    speak(f"Playing {query} on YouTube.")
+    encoded = urllib.parse.quote_plus(query)
+    url = f"https://www.youtube.com/results?search_query={encoded}"
     webbrowser.open(url)
 
 

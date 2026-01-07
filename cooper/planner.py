@@ -1,15 +1,28 @@
+import json
 from cooper.ai_answer import ai_client
 
 SYSTEM_PROMPT = """
 You are COOPER's planning engine.
 
 Convert the user's request into a JSON list of steps.
+
 Each step must have:
-- action: one of [open_website, open_application, youtube_search, youtube_play, write_text]
+- action: one of [
+  open_website,
+  open_application,
+  google_search,
+  youtube_search,
+  youtube_play,
+  write_text
+]
 - target: string or null
 
-Only return valid JSON.
-Do not explain.
+Rules:
+- If user asks to search Google, use google_search with the query
+- If user asks to play music or a song on YouTube, use youtube_search with the song name
+- If user just says open YouTube, use youtube_play
+- Return ONLY valid JSON
+- Do not explain anything
 """
 
 def plan_steps(user_input: str):
@@ -23,4 +36,4 @@ def plan_steps(user_input: str):
     )
 
     text = response.choices[0].message.content.strip()
-    return eval(text)
+    return json.loads(text)

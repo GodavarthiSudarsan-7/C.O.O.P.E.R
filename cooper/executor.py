@@ -2,6 +2,7 @@ from cooper.actions import (
     open_website,
     open_application,
     google_search,
+    youtube_search,
     youtube_play,
     write_text,
 )
@@ -23,6 +24,9 @@ def execute_steps(steps):
 
         elif action == "google_search":
             google_search(target)
+
+        elif action == "youtube_search":
+            youtube_search(target)
 
         elif action == "youtube_play":
             youtube_play()
