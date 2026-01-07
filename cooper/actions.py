@@ -3,7 +3,13 @@ import subprocess
 import time
 import os
 import urllib.parse
+
 from cooper.voice import speak
+from cooper.memory.memory_manager import MemoryManager
+
+
+memory = MemoryManager()
+
 
 
 def open_website(url: str):
@@ -12,6 +18,7 @@ def open_website(url: str):
         webbrowser.open(url)
     except Exception:
         speak("I was unable to open the website.")
+
 
 
 def open_application(app_name: str):
@@ -33,6 +40,7 @@ def open_application(app_name: str):
         speak("I cannot open that application.")
 
 
+
 def google_search(query: str):
     speak(f"Searching Google for {query}.")
     encoded = urllib.parse.quote_plus(query)
@@ -52,6 +60,7 @@ def youtube_play():
     webbrowser.open("https://www.youtube.com")
 
 
+
 def write_text(text: str):
     speak("Writing text.")
     try:
@@ -61,6 +70,7 @@ def write_text(text: str):
         pyautogui.write(text, interval=0.05)
     except Exception:
         speak("I could not write the text.")
+
 
 
 def system_volume(action: str):
@@ -94,6 +104,7 @@ def system_volume(action: str):
         speak("I could not control the volume.")
 
 
+
 def system_power(action: str):
     if action == "shutdown":
         speak("Shutting down the system in five seconds.")
@@ -105,3 +116,45 @@ def system_power(action: str):
 
     else:
         speak("Power command not recognized.")
+
+
+
+def handle_memory_store(text: str):
+    
+    clean = text.lower().replace("remember", "").strip()
+
+    if " is " in clean:
+        key, value = clean.split(" is ", 1)
+        key = key.replace("my", "").strip()
+
+        memory.remember(
+            category="profile",
+            key=key,
+            value=value.strip()
+        )
+
+        response = f"Got it. I will remember your {key} is {value}."
+        speak(response)
+        return response
+
+    response = "Tell me clearly what you want me to remember."
+    speak(response)
+    return response
+
+
+def handle_memory_recall(text: str):
+   
+    if "my name" in text.lower():
+        name = memory.recall("name")
+
+        if name:
+            response = f"Your name is {name}."
+        else:
+            response = "I don't know your name yet."
+
+        speak(response)
+        return response
+
+    response = "I don't have that information yet."
+    speak(response)
+    return response
