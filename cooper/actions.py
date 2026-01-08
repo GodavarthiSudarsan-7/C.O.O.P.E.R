@@ -7,9 +7,7 @@ import urllib.parse
 from cooper.voice import speak
 from cooper.memory.memory_manager import MemoryManager
 
-
 memory = MemoryManager()
-
 
 
 def open_website(url: str):
@@ -18,7 +16,6 @@ def open_website(url: str):
         webbrowser.open(url)
     except Exception:
         speak("I was unable to open the website.")
-
 
 
 def open_application(app_name: str):
@@ -40,6 +37,28 @@ def open_application(app_name: str):
         speak("I cannot open that application.")
 
 
+def open_file_explorer():
+    speak("Opening file explorer.")
+    subprocess.Popen("explorer", shell=True)
+
+
+def open_known_folder(folder: str):
+    base = os.path.expanduser("~")
+
+    folders = {
+        "documents": os.path.join(base, "Documents"),
+        "downloads": os.path.join(base, "Downloads"),
+        "desktop": os.path.join(base, "Desktop")
+    }
+
+    path = folders.get(folder)
+
+    if path and os.path.exists(path):
+        speak(f"Opening {folder}.")
+        subprocess.Popen(f'explorer "{path}"', shell=True)
+    else:
+        speak("I cannot find that folder.")
+
 
 def google_search(query: str):
     speak(f"Searching Google for {query}.")
@@ -60,7 +79,6 @@ def youtube_play():
     webbrowser.open("https://www.youtube.com")
 
 
-
 def write_text(text: str):
     speak("Writing text.")
     try:
@@ -70,7 +88,6 @@ def write_text(text: str):
         pyautogui.write(text, interval=0.05)
     except Exception:
         speak("I could not write the text.")
-
 
 
 def system_volume(action: str):
@@ -104,7 +121,6 @@ def system_volume(action: str):
         speak("I could not control the volume.")
 
 
-
 def system_power(action: str):
     if action == "shutdown":
         speak("Shutting down the system in five seconds.")
@@ -118,9 +134,7 @@ def system_power(action: str):
         speak("Power command not recognized.")
 
 
-
 def handle_memory_store(text: str):
-    
     clean = text.lower().replace("remember", "").strip()
 
     if " is " in clean:
@@ -143,7 +157,6 @@ def handle_memory_store(text: str):
 
 
 def handle_memory_recall(text: str):
-   
     if "my name" in text.lower():
         name = memory.recall("name")
 

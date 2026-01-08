@@ -15,8 +15,10 @@ from cooper.actions import (
     open_application,
     system_volume,
     system_power,
-    handle_memory_store,     
-    handle_memory_recall      
+    handle_memory_store,
+    handle_memory_recall,
+    open_file_explorer,
+    open_known_folder
 )
 from cooper.ai_answer import answer_question
 from cooper.personality import acknowledge, done, confirm_power
@@ -70,19 +72,30 @@ class CooperShell(QWidget):
 
         intent = get_intent(text)
 
-        
         if intent["action"] == "memory_store":
             response = handle_memory_store(intent["target"])
             self.write(f"COOPER: {response}")
             return
 
-        
         elif intent["action"] == "memory_recall":
             response = handle_memory_recall(intent["target"])
             self.write(f"COOPER: {response}")
             return
 
-       
+        elif intent["action"] == "open_explorer":
+            msg = acknowledge()
+            self.write(f"COOPER: {msg}")
+            speak(msg)
+            open_file_explorer()
+            return
+
+        elif intent["action"] == "open_folder":
+            msg = acknowledge()
+            self.write(f"COOPER: {msg}")
+            speak(msg)
+            open_known_folder(intent["target"])
+            return
+
         elif intent["action"] == "open_website":
             msg = acknowledge()
             self.write(f"COOPER: {msg}")
@@ -92,7 +105,6 @@ class CooperShell(QWidget):
             self.write(f"COOPER: {msg}")
             speak(msg)
 
-        
         elif intent["action"] == "open_application":
             msg = acknowledge()
             self.write(f"COOPER: {msg}")
@@ -101,7 +113,6 @@ class CooperShell(QWidget):
             msg = done()
             self.write(f"COOPER: {msg}")
             speak(msg)
-
 
         elif intent["action"] == "system_volume":
             msg = acknowledge()
@@ -112,14 +123,12 @@ class CooperShell(QWidget):
             self.write(f"COOPER: {msg}")
             speak(msg)
 
-      
         elif intent["action"] == "system_power":
             msg = confirm_power()
             self.write(f"COOPER: {msg}")
             speak(msg)
             system_power(intent["target"])
 
-        
         else:
             try:
                 from cooper.planner import plan_steps
