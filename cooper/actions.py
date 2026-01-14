@@ -125,17 +125,35 @@ def system_power(action: str):
 def handle_memory_store(text: str):
     clean = text.lower().replace("remember", "").strip()
 
+    if clean.startswith("my "):
+        clean = clean.replace("my ", "", 1)
+
     if " is " in clean:
         key, value = clean.split(" is ", 1)
-        key = key.replace("my", "").strip()
-        memory.remember("profile", key, value.strip())
-        response = f"Got it. I will remember your {key} is {value}."
+
+    elif len(clean.split()) >= 2:
+        parts = clean.split()
+        key = parts[0]
+        value = " ".join(parts[1:])
+
+    else:
+        response = "Tell me clearly what you want me to remember."
         speak(response)
         return response
 
-    response = "Tell me clearly what you want me to remember."
+    key = key.strip()
+    value = value.strip()
+
+    memory.remember(
+        category="profile",
+        key=key,
+        value=value
+    )
+
+    response = f"Got it. I will remember your {key} is {value}."
     speak(response)
     return response
+
 
 
 def handle_memory_recall(text: str):

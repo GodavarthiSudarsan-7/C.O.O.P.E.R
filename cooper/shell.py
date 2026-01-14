@@ -1,3 +1,4 @@
+from cooper.assistant.proactive import ProactiveAssistant
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTextEdit, QLineEdit
 import sys
 
@@ -42,8 +43,15 @@ class CooperShell(QWidget):
         speak("Initialization complete. COOPER is ready, Boss.")
         self.input.setFocus()
 
+        self.proactive = ProactiveAssistant(self.trigger_proactive)
+        self.proactive.start()
+
     def write(self, text):
         self.output.append(text)
+
+    def trigger_proactive(self, text):
+        self.write(f"COOPER: {text}")
+        speak(text)
 
     def handle_input(self):
         text = self.input.text().strip()
