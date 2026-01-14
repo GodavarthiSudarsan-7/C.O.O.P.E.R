@@ -4,6 +4,12 @@ def rule_intent(text: str):
     if text.startswith("remember"):
         return {"action": "memory_store", "target": text}
 
+    if text.startswith("remind me"):
+        return {"action": "add_reminder", "target": text}
+
+    if "my reminders" in text or "what are my reminders" in text:
+        return {"action": "list_reminders", "target": None}
+
     if "my name" in text or "what do you know about me" in text:
         return {"action": "memory_recall", "target": text}
 

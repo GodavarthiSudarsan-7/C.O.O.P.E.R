@@ -3,11 +3,39 @@ import subprocess
 import time
 import os
 import urllib.parse
+import sqlite3
+from datetime import datetime
 
 from cooper.voice import speak
 from cooper.memory.memory_manager import MemoryManager
 
 memory = MemoryManager()
+
+DB_PATH = os.path.join(os.path.dirname(__file__), "memory", "memory.db")
+
+
+class ReminderManager:
+    def __init__(self):
+        self.conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+        self.cursor = self.conn.cursor()
+        self.cursor.execute(
+            "CREATE TABLE IF NOT EXISTS reminders (id INTEGER PRIMARY KEY AUTOINCREMENT, text TEXT, created_at TEXT)"
+        )
+        self.conn.commit()
+
+    def add(self, text):
+        self.cursor.execute(
+            "INSERT INTO reminders VALUES (NULL, ?, ?)",
+            (text, datetime.now().isoformat())
+        )
+        self.conn.commit()
+
+    def list_all(self):
+        self.cursor.execute("SELECT text FROM reminders ORDER BY id DESC")
+        return [row[0] for row in self.cursor.fetchall()]
+
+
+reminders = ReminderManager()
 
 
 def open_website(url: str):
@@ -60,36 +88,6 @@ def open_known_folder(folder: str):
         speak("I cannot find that folder.")
 
 
-def google_search(query: str):
-    speak(f"Searching Google for {query}.")
-    encoded = urllib.parse.quote_plus(query)
-    url = f"https://www.google.com/search?q={encoded}"
-    webbrowser.open(url)
-
-
-def youtube_search(query: str):
-    speak(f"Playing {query} on YouTube.")
-    encoded = urllib.parse.quote_plus(query)
-    url = f"https://www.youtube.com/results?search_query={encoded}"
-    webbrowser.open(url)
-
-
-def youtube_play():
-    speak("Opening YouTube.")
-    webbrowser.open("https://www.youtube.com")
-
-
-def write_text(text: str):
-    speak("Writing text.")
-    try:
-        subprocess.Popen("notepad.exe", shell=True)
-        time.sleep(1)
-        import pyautogui
-        pyautogui.write(text, interval=0.05)
-    except Exception:
-        speak("I could not write the text.")
-
-
 def system_volume(action: str):
     try:
         if action == "up":
@@ -102,21 +100,15 @@ def system_volume(action: str):
             speak("Muting volume.")
             key = "[char]173"
         else:
-            speak("Volume command not recognized.")
             return
 
         for _ in range(5):
             subprocess.call(
-                [
-                    "powershell",
-                    "-Command",
-                    f"(New-Object -ComObject WScript.Shell).SendKeys({key})"
-                ],
+                ["powershell", "-Command", f"(New-Object -ComObject WScript.Shell).SendKeys({key})"],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL
             )
             time.sleep(0.05)
-
     except Exception:
         speak("I could not control the volume.")
 
@@ -125,13 +117,9 @@ def system_power(action: str):
     if action == "shutdown":
         speak("Shutting down the system in five seconds.")
         os.system("shutdown /s /t 5")
-
     elif action == "restart":
         speak("Restarting the system in five seconds.")
         os.system("shutdown /r /t 5")
-
-    else:
-        speak("Power command not recognized.")
 
 
 def handle_memory_store(text: str):
@@ -140,13 +128,7 @@ def handle_memory_store(text: str):
     if " is " in clean:
         key, value = clean.split(" is ", 1)
         key = key.replace("my", "").strip()
-
-        memory.remember(
-            category="profile",
-            key=key,
-            value=value.strip()
-        )
-
+        memory.remember("profile", key, value.strip())
         response = f"Got it. I will remember your {key} is {value}."
         speak(response)
         return response
@@ -159,15 +141,25 @@ def handle_memory_store(text: str):
 def handle_memory_recall(text: str):
     if "my name" in text.lower():
         name = memory.recall("name")
-
-        if name:
-            response = f"Your name is {name}."
-        else:
-            response = "I don't know your name yet."
-
+        response = f"Your name is {name}." if name else "I don't know your name yet."
         speak(response)
         return response
 
     response = "I don't have that information yet."
+    speak(response)
+    return response
+
+
+def handle_add_reminder(text: str):
+    reminder_text = text.lower().replace("remind me", "").strip()
+    reminders.add(reminder_text)
+    response = f"Got it. I will remind you to {reminder_text}."
+    speak(response)
+    return response
+
+
+def handle_list_reminders():
+    items = reminders.list_all()
+    response = "You have no reminders." if not items else "Your reminders are: " + ", ".join(items) + "."
     speak(response)
     return response

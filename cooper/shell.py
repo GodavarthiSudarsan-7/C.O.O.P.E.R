@@ -1,10 +1,4 @@
-from PySide6.QtWidgets import (
-    QApplication,
-    QWidget,
-    QVBoxLayout,
-    QTextEdit,
-    QLineEdit
-)
+from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTextEdit, QLineEdit
 import sys
 
 from cooper.voice import speak
@@ -18,7 +12,9 @@ from cooper.actions import (
     handle_memory_store,
     handle_memory_recall,
     open_file_explorer,
-    open_known_folder
+    open_known_folder,
+    handle_add_reminder,
+    handle_list_reminders
 )
 from cooper.ai_answer import answer_question
 from cooper.personality import acknowledge, done, confirm_power
@@ -44,7 +40,6 @@ class CooperShell(QWidget):
 
         self.write("Initialization complete. COOPER is ready, Boss.")
         speak("Initialization complete. COOPER is ready, Boss.")
-
         self.input.setFocus()
 
     def write(self, text):
@@ -53,10 +48,8 @@ class CooperShell(QWidget):
     def handle_input(self):
         text = self.input.text().strip()
         self.input.clear()
-
         if not text:
             return
-
         self.write(f"YOU: {text}")
         self.process_command(text)
         self.input.setFocus()
@@ -79,6 +72,16 @@ class CooperShell(QWidget):
 
         elif intent["action"] == "memory_recall":
             response = handle_memory_recall(intent["target"])
+            self.write(f"COOPER: {response}")
+            return
+
+        elif intent["action"] == "add_reminder":
+            response = handle_add_reminder(intent["target"])
+            self.write(f"COOPER: {response}")
+            return
+
+        elif intent["action"] == "list_reminders":
+            response = handle_list_reminders()
             self.write(f"COOPER: {response}")
             return
 
@@ -133,16 +136,12 @@ class CooperShell(QWidget):
             try:
                 from cooper.planner import plan_steps
                 from cooper.executor import execute_steps
-
                 self.write("COOPER: Planning steps.")
                 speak("Let me think.")
-
                 steps = plan_steps(text)
                 execute_steps(steps)
-
                 self.write("COOPER: Done.")
                 speak("Done.")
-
             except Exception:
                 answer = answer_question(text)
                 self.write(f"COOPER: {answer}")
