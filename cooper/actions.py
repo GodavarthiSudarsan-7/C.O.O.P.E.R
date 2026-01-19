@@ -130,12 +130,10 @@ def handle_memory_store(text: str):
 
     if " is " in clean:
         key, value = clean.split(" is ", 1)
-
     elif len(clean.split()) >= 2:
         parts = clean.split()
         key = parts[0]
         value = " ".join(parts[1:])
-
     else:
         response = "Tell me clearly what you want me to remember."
         speak(response)
@@ -144,16 +142,11 @@ def handle_memory_store(text: str):
     key = key.strip()
     value = value.strip()
 
-    memory.remember(
-        category="profile",
-        key=key,
-        value=value
-    )
+    memory.remember("profile", key, value)
 
     response = f"Got it. I will remember your {key} is {value}."
     speak(response)
     return response
-
 
 
 def handle_memory_recall(text: str):
@@ -179,5 +172,19 @@ def handle_add_reminder(text: str):
 def handle_list_reminders():
     items = reminders.list_all()
     response = "You have no reminders." if not items else "Your reminders are: " + ", ".join(items) + "."
+    speak(response)
+    return response
+
+
+def handle_set_mode(mode: str):
+    memory.remember("system", "mode", mode)
+    response = f"{mode.capitalize()} mode activated."
+    speak(response)
+    return response
+
+
+def handle_get_mode():
+    mode = memory.recall("mode") or "normal"
+    response = f"I am currently in {mode} mode."
     speak(response)
     return response
