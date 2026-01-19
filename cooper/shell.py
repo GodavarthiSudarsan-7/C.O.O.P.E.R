@@ -15,7 +15,9 @@ from cooper.actions import (
     open_file_explorer,
     open_known_folder,
     handle_add_reminder,
-    handle_list_reminders
+    handle_list_reminders,
+    handle_set_mode,
+    handle_get_mode
 )
 from cooper.ai_answer import answer_question
 from cooper.personality import acknowledge, done, confirm_power
@@ -73,7 +75,17 @@ class CooperShell(QWidget):
 
         intent = get_intent(text)
 
-        if intent["action"] == "memory_store":
+        if intent["action"] == "set_mode":
+            response = handle_set_mode(intent["target"])
+            self.write(f"COOPER: {response}")
+            return
+
+        elif intent["action"] == "get_mode":
+            response = handle_get_mode()
+            self.write(f"COOPER: {response}")
+            return
+
+        elif intent["action"] == "memory_store":
             response = handle_memory_store(intent["target"])
             self.write(f"COOPER: {response}")
             return
