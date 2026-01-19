@@ -1,6 +1,21 @@
 def rule_intent(text: str):
     text = text.lower()
 
+    if "focus mode" in text:
+        return {"action": "set_mode", "target": "focus"}
+
+    if "work mode" in text:
+        return {"action": "set_mode", "target": "work"}
+
+    if "chill mode" in text:
+        return {"action": "set_mode", "target": "chill"}
+
+    if "night mode" in text:
+        return {"action": "set_mode", "target": "night"}
+
+    if "what mode" in text:
+        return {"action": "get_mode", "target": None}
+
     if text.startswith("remember"):
         return {"action": "memory_store", "target": text}
 
