@@ -1,6 +1,15 @@
 def rule_intent(text: str):
     text = text.lower()
 
+    if "i am working on" in text or "my task is" in text:
+        return {"action": "set_task", "target": text}
+
+    if "what am i working on" in text:
+        return {"action": "get_task", "target": None}
+
+    if "clear my task" in text or "finish my task" in text:
+        return {"action": "clear_task", "target": None}
+
     if "focus mode" in text:
         return {"action": "set_mode", "target": "focus"}
 

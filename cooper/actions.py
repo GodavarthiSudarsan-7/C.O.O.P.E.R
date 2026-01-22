@@ -139,11 +139,7 @@ def handle_memory_store(text: str):
         speak(response)
         return response
 
-    key = key.strip()
-    value = value.strip()
-
-    memory.remember("profile", key, value)
-
+    memory.remember("profile", key.strip(), value.strip())
     response = f"Got it. I will remember your {key} is {value}."
     speak(response)
     return response
@@ -186,5 +182,27 @@ def handle_set_mode(mode: str):
 def handle_get_mode():
     mode = memory.recall("mode") or "normal"
     response = f"I am currently in {mode} mode."
+    speak(response)
+    return response
+
+
+def handle_set_task(text: str):
+    task = text.lower().replace("i am working on", "").replace("my task is", "").strip()
+    memory.remember("task", "current", task)
+    response = f"Alright. You are working on {task}."
+    speak(response)
+    return response
+
+
+def handle_get_task():
+    task = memory.recall("current")
+    response = f"You are currently working on {task}." if task else "You are not working on anything right now."
+    speak(response)
+    return response
+
+
+def handle_clear_task():
+    memory.remember("task", "current", "")
+    response = "Task cleared. What would you like to work on next?"
     speak(response)
     return response

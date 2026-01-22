@@ -17,7 +17,10 @@ from cooper.actions import (
     handle_add_reminder,
     handle_list_reminders,
     handle_set_mode,
-    handle_get_mode
+    handle_get_mode,
+    handle_set_task,
+    handle_get_task,
+    handle_clear_task
 )
 from cooper.ai_answer import answer_question
 from cooper.personality import acknowledge, done, confirm_power
@@ -75,7 +78,22 @@ class CooperShell(QWidget):
 
         intent = get_intent(text)
 
-        if intent["action"] == "set_mode":
+        if intent["action"] == "set_task":
+            response = handle_set_task(intent["target"])
+            self.write(f"COOPER: {response}")
+            return
+
+        elif intent["action"] == "get_task":
+            response = handle_get_task()
+            self.write(f"COOPER: {response}")
+            return
+
+        elif intent["action"] == "clear_task":
+            response = handle_clear_task()
+            self.write(f"COOPER: {response}")
+            return
+
+        elif intent["action"] == "set_mode":
             response = handle_set_mode(intent["target"])
             self.write(f"COOPER: {response}")
             return
