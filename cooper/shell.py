@@ -22,6 +22,7 @@ from cooper.actions import (
     handle_get_task,
     handle_clear_task
 )
+from cooper.work.dispatcher import dispatch_work
 from cooper.ai_answer import answer_question
 from cooper.personality import acknowledge, done, confirm_power
 
@@ -145,6 +146,7 @@ class CooperShell(QWidget):
             msg = done()
             self.write(f"COOPER: {msg}")
             speak(msg)
+            return
 
         elif intent["action"] == "open_application":
             msg = acknowledge()
@@ -154,6 +156,7 @@ class CooperShell(QWidget):
             msg = done()
             self.write(f"COOPER: {msg}")
             speak(msg)
+            return
 
         elif intent["action"] == "system_volume":
             msg = acknowledge()
@@ -163,27 +166,24 @@ class CooperShell(QWidget):
             msg = done()
             self.write(f"COOPER: {msg}")
             speak(msg)
+            return
 
         elif intent["action"] == "system_power":
             msg = confirm_power()
             self.write(f"COOPER: {msg}")
             speak(msg)
             system_power(intent["target"])
+            return
 
-        else:
-            try:
-                from cooper.planner import plan_steps
-                from cooper.executor import execute_steps
-                self.write("COOPER: Planning steps.")
-                speak("Let me think.")
-                steps = plan_steps(text)
-                execute_steps(steps)
-                self.write("COOPER: Done.")
-                speak("Done.")
-            except Exception:
-                answer = answer_question(text)
-                self.write(f"COOPER: {answer}")
-                speak(answer)
+        result = dispatch_work(text)
+        if result:
+            self.write(f"COOPER: {result}")
+            speak(result)
+            return
+
+        answer = answer_question(text)
+        self.write(f"COOPER: {answer}")
+        speak(answer)
 
 
 def run_shell():
