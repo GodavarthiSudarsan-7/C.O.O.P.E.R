@@ -1,6 +1,12 @@
 def rule_intent(text: str):
     text = text.lower()
 
+    if "chat mode" in text:
+        return {"action": "chat_mode_on", "target": None}
+
+    if "exit chat" in text or "assistant mode" in text:
+        return {"action": "chat_mode_off", "target": None}
+
     if "i am working on" in text or "my task is" in text:
         return {"action": "set_task", "target": text}
 

@@ -49,6 +49,8 @@ class CooperShell(QWidget):
         speak("Initialization complete. COOPER is ready, Boss.")
         self.input.setFocus()
 
+        self.chat_mode = False
+
         self.proactive = ProactiveAssistant(self.trigger_proactive)
         self.proactive.start()
 
@@ -78,6 +80,26 @@ class CooperShell(QWidget):
             return
 
         intent = get_intent(text)
+
+        if intent["action"] == "chat_mode_on":
+            self.chat_mode = True
+            response = "Chat mode activated. I’m listening."
+            self.write(f"COOPER: {response}")
+            speak(response)
+            return
+
+        elif intent["action"] == "chat_mode_off":
+            self.chat_mode = False
+            response = "Back to assistant mode."
+            self.write(f"COOPER: {response}")
+            speak(response)
+            return
+
+        if self.chat_mode:
+            answer = answer_question(text)
+            self.write(f"COOPER: {answer}")
+            speak(answer)
+            return
 
         if intent["action"] == "set_task":
             response = handle_set_task(intent["target"])
