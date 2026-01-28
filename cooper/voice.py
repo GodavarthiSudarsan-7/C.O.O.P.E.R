@@ -6,36 +6,59 @@ import numpy as np
 import scipy.io.wavfile as wav
 import pyttsx3
 import tempfile
+import threading
 
 os.environ["PATH"] += os.pathsep + r"C:\Users\sudu6\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg.Essentials_Microsoft.WinGet.Source_8wekyb3d8bbwe\ffmpeg-8.0.1-essentials_build\bin"
 
 model = whisper.load_model("tiny")
 
+_speaking = False
+_stop_flag = False
+_lock = threading.Lock()
 
-def _init_tts():
-    engine = pyttsx3.init(driverName="sapi5")
-    engine.setProperty("rate", 155)
-    engine.setProperty("volume", 1.0)
-    voices = engine.getProperty("voices")
-    engine.setProperty("voice", voices[0].id)
-    return engine
+
+def stop():
+    global _stop_flag, _speaking
+    with _lock:
+        _stop_flag = True
+        _speaking = False
+    sd.stop()
 
 
 def speak(text: str):
+    global _speaking, _stop_flag
     print(f"COOPER: {text}")
-    sd.stop()
-    time.sleep(0.2)
-    engine = _init_tts()
-    engine.say(text)
-    engine.runAndWait()
-    engine.stop()
-    time.sleep(0.3)
+    stop()
+
+    def run():
+        global _speaking, _stop_flag
+        _stop_flag = False
+        _speaking = True
+
+        engine = pyttsx3.init(driverName="sapi5")
+        engine.setProperty("rate", 155)
+        engine.setProperty("volume", 1.0)
+        voices = engine.getProperty("voices")
+        engine.setProperty("voice", voices[0].id)
+
+        engine.say(text)
+
+        while engine.isBusy():
+            if _stop_flag:
+                engine.stop()
+                break
+            engine.runAndWait()
+
+        engine.stop()
+        _speaking = False
+
+    threading.Thread(target=run, daemon=True).start()
 
 
 def listen(duration: int = 6) -> str:
     fs = 16000
     print("[COOPER] Listening...")
-    sd.stop()
+    stop()
 
     recording = sd.rec(
         int(duration * fs),
