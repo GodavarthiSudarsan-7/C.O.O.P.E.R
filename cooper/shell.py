@@ -2,7 +2,7 @@ from cooper.assistant.proactive import ProactiveAssistant
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTextEdit, QLineEdit
 import sys
 
-from cooper.voice import speak
+from cooper.voice import speak, stop
 from cooper.utils import clean_input, normalize_command
 from cooper.intent_router import get_intent
 from cooper.actions import (
@@ -73,7 +73,13 @@ class CooperShell(QWidget):
     def process_command(self, text):
         text = normalize_command(clean_input(text.lower()))
 
+        if text in ("stop", "stop speaking", "quiet", "silence"):
+            stop()
+            self.write("COOPER: Stopped.")
+            return
+
         if text in ("exit", "quit", "stop cooper"):
+            stop()
             self.write("COOPER: Shutting down.")
             speak("Shutting down. Goodbye boss.")
             QApplication.quit()
@@ -96,12 +102,14 @@ class CooperShell(QWidget):
             return
 
         if self.chat_mode:
+            stop()
             answer = answer_question(text)
             self.write(f"COOPER: {answer}")
             speak(answer)
             return
 
         if intent["action"] == "set_task":
+            stop()
             response = handle_set_task(intent["target"])
             self.write(f"COOPER: {response}")
             return
@@ -112,11 +120,13 @@ class CooperShell(QWidget):
             return
 
         elif intent["action"] == "clear_task":
+            stop()
             response = handle_clear_task()
             self.write(f"COOPER: {response}")
             return
 
         elif intent["action"] == "set_mode":
+            stop()
             response = handle_set_mode(intent["target"])
             self.write(f"COOPER: {response}")
             return
@@ -127,6 +137,7 @@ class CooperShell(QWidget):
             return
 
         elif intent["action"] == "memory_store":
+            stop()
             response = handle_memory_store(intent["target"])
             self.write(f"COOPER: {response}")
             return
@@ -137,6 +148,7 @@ class CooperShell(QWidget):
             return
 
         elif intent["action"] == "add_reminder":
+            stop()
             response = handle_add_reminder(intent["target"])
             self.write(f"COOPER: {response}")
             return
@@ -147,6 +159,7 @@ class CooperShell(QWidget):
             return
 
         elif intent["action"] == "open_explorer":
+            stop()
             msg = acknowledge()
             self.write(f"COOPER: {msg}")
             speak(msg)
@@ -154,6 +167,7 @@ class CooperShell(QWidget):
             return
 
         elif intent["action"] == "open_folder":
+            stop()
             msg = acknowledge()
             self.write(f"COOPER: {msg}")
             speak(msg)
@@ -161,6 +175,7 @@ class CooperShell(QWidget):
             return
 
         elif intent["action"] == "open_website":
+            stop()
             msg = acknowledge()
             self.write(f"COOPER: {msg}")
             speak(msg)
@@ -171,6 +186,7 @@ class CooperShell(QWidget):
             return
 
         elif intent["action"] == "open_application":
+            stop()
             msg = acknowledge()
             self.write(f"COOPER: {msg}")
             speak(msg)
@@ -181,6 +197,7 @@ class CooperShell(QWidget):
             return
 
         elif intent["action"] == "system_volume":
+            stop()
             msg = acknowledge()
             self.write(f"COOPER: {msg}")
             speak(msg)
@@ -191,18 +208,21 @@ class CooperShell(QWidget):
             return
 
         elif intent["action"] == "system_power":
+            stop()
             msg = confirm_power()
             self.write(f"COOPER: {msg}")
             speak(msg)
             system_power(intent["target"])
             return
 
+        stop()
         result = dispatch_work(text)
         if result:
             self.write(f"COOPER: {result}")
             speak(result)
             return
 
+        stop()
         answer = answer_question(text)
         self.write(f"COOPER: {answer}")
         speak(answer)
