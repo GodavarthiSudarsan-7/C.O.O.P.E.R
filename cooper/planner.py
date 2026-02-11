@@ -1,5 +1,5 @@
 import json
-from cooper.ai_answer import ai_client
+import ollama
 
 SYSTEM_PROMPT = """
 You are COOPER's planning engine.
@@ -26,14 +26,13 @@ Rules:
 """
 
 def plan_steps(user_input: str):
-    response = ai_client.chat.completions.create(
-        model="gpt-4o-mini",
+    response = ollama.chat(
+        model="mistral",
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": user_input}
-        ],
-        temperature=0
+        ]
     )
 
-    text = response.choices[0].message.content.strip()
+    text = response["message"]["content"].strip()
     return json.loads(text)
