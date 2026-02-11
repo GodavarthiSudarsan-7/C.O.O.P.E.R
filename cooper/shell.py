@@ -23,8 +23,8 @@ from cooper.actions import (
     handle_clear_task
 )
 from cooper.work.dispatcher import dispatch_work
-from cooper.ai_answer import answer_question
 from cooper.personality import acknowledge, done, confirm_power
+from cooper.brain import think
 
 
 class CooperShell(QWidget):
@@ -103,9 +103,9 @@ class CooperShell(QWidget):
 
         if self.chat_mode:
             stop()
-            answer = answer_question(text)
-            self.write(f"COOPER: {answer}")
-            speak(answer)
+            response = think(text)
+            self.write(f"COOPER: {response}")
+            speak(response)
             return
 
         if intent["action"] == "set_task":
@@ -223,9 +223,9 @@ class CooperShell(QWidget):
             return
 
         stop()
-        answer = answer_question(text)
-        self.write(f"COOPER: {answer}")
-        speak(answer)
+        response = think(text)
+        self.write(f"COOPER: {response}")
+        speak(response)
 
 
 def run_shell():
