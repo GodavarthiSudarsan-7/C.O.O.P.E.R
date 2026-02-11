@@ -7,3 +7,5 @@ class PluginRegistry:
 
     def get_plugins_for_intent(self, intent):
         return [p for p in self.plugins if p.can_handle(intent)]
+
+registry = PluginRegistry()
