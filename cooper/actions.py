@@ -122,6 +122,34 @@ def system_power(action: str):
         os.system("shutdown /r /t 5")
 
 
+def google_search(query: str):
+    speak("Searching on Google.")
+    url = "https://www.google.com/search?q=" + urllib.parse.quote(query)
+    webbrowser.open(url)
+
+
+def youtube_search(query: str):
+    speak("Searching on YouTube.")
+    url = "https://www.youtube.com/results?search_query=" + urllib.parse.quote(query)
+    webbrowser.open(url)
+
+
+def youtube_play():
+    speak("Opening YouTube.")
+    webbrowser.open("https://www.youtube.com")
+
+
+def write_text(text: str):
+    speak("Writing text.")
+    subprocess.Popen(["notepad.exe"])
+    time.sleep(1)
+    subprocess.call(
+        ["powershell", "-Command", f"(New-Object -ComObject WScript.Shell).SendKeys('{text}')"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+
+
 def handle_memory_store(text: str):
     clean = text.lower().replace("remember", "").strip()
 
