@@ -1,5 +1,5 @@
-from work.plugin_interface import Plugin
-from planner import create_plan  # use existing function
+from cooper.work.plugin_interface import Plugin
+from cooper.planner import plan_steps
 
 class PlannerPlugin(Plugin):
 
@@ -7,10 +7,10 @@ class PlannerPlugin(Plugin):
     def name(self):
         return "Planner"
 
-    def can_handle(self, intent: str) -> bool:
-        return intent == "complex_task"
+    def can_handle(self, intent):
+        return True
 
-    def execute(self, context: dict) -> dict:
-        plan = create_plan(context["input"])
+    def execute(self, context):
+        plan = plan_steps(context["input"])
         context["plan"] = plan
         return context
