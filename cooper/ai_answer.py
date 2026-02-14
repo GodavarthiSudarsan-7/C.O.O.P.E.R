@@ -1,11 +1,9 @@
 import ollama
 
-
 SYSTEM_PROMPT = """
 You are COOPER, a professional personal assistant.
 Answer clearly and concisely.
 """
-
 
 def answer_question(question: str) -> str:
     response = ollama.chat(
