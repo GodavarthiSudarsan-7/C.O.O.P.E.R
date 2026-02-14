@@ -8,7 +8,15 @@ class PlannerPlugin(Plugin):
         return "Planner"
 
     def can_handle(self, intent):
-        return True
+        action = intent.get("action")
+        return action in [
+            "open_website",
+            "open_application",
+            "google_search",
+            "youtube_search",
+            "youtube_play",
+            "write_text"
+        ]
 
     def execute(self, context):
         plan = plan_steps(context["input"])
