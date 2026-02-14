@@ -1,9 +1,8 @@
 from cooper.memory.memory_manager import MemoryManager
-from cooper.intent.intent_router import detect_intent
-from cooper.work.plugin_registry import PluginRegistry
+from cooper.intent_router import get_intent
+from cooper.work.plugin_registry import registry
 
 memory = MemoryManager()
-registry = PluginRegistry()
 
 def think(user_input: str) -> str:
     memory.remember(
@@ -12,7 +11,7 @@ def think(user_input: str) -> str:
         value=user_input
     )
 
-    intent = detect_intent(user_input)
+    intent = get_intent(user_input)
 
     context = {
         "input": user_input,
