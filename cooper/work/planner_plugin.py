@@ -12,8 +12,6 @@ class PlannerPlugin(Plugin):
         return action in [
             "open_website",
             "open_application",
-            "google_search",
-            "youtube_search",
             "youtube_play",
             "write_text"
         ]
