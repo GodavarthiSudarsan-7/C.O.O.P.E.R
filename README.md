@@ -1,6 +1,6 @@
-# 🤖 C.O.O.P.E.R – Personal AI Voice Assistant
+# 🤖 C.O.O.P.E.R – Personal AI  Assistant
 
-C.O.O.P.E.R (Conversational Operations & Organized Personal Executive Robot) is a **Python-based personal AI voice assistant** designed to automate system tasks, respond intelligently to user commands, and provide a modular foundation for future AI capabilities.
+C.O.O.P.E.R  is a **Python-based personal AI assistant** designed to automate system tasks, respond intelligently to user commands, and provide a modular foundation for future AI capabilities.
 
 This project focuses on **clean architecture**, **intent-based command routing**, and **local system control**, making it both a learning project and a strong resume showcase.
 
