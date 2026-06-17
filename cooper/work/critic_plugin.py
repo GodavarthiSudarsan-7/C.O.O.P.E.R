@@ -1,5 +1,4 @@
 from cooper.work.plugin_interface import Plugin
-from cooper.planner import plan_steps
 
 VALID_ACTIONS = {
     "open_website",
@@ -17,21 +16,21 @@ class CriticPlugin(Plugin):
         return "CriticPlugin"
 
     def can_handle(self, intent):
-        return True
+        return intent.get("action") not in [None, "unknown"]
 
     def execute(self, context):
         plan = context.get("plan")
 
-        if not plan or not isinstance(plan, list):
-            new_plan = plan_steps(context["input"])
-            context["plan"] = new_plan
-            context["replanned"] = True
+        if not plan:
+            return context
+
+        if not isinstance(plan, list):
+            context.pop("plan", None)
             return context
 
         for step in plan:
             if step.get("action") not in VALID_ACTIONS:
                 context.pop("plan", None)
-                context["invalid_plan"] = True
                 return context
 
         return context
