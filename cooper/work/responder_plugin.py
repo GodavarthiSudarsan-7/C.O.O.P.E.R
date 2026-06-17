@@ -20,20 +20,11 @@ class ResponderPlugin(Plugin):
         if user_input.startswith("search "):
             query = user_input.replace("search ", "", 1)
             google_search(query)
-            context["response"] = "Searching on Google."
+            context["response"] = f"Searching Google for {query}."
             return context
 
         response = answer_question(context["input"])
 
-        if any(x in response.lower() for x in [
-            "i don't know",
-            "not sure",
-            "no information",
-            "cannot find"
-        ]):
-            google_search(context["input"])
-            context["response"] = "I couldn't find a confident answer, so I searched it on Google."
-            return context
-
         context["response"] = response
+
         return context

@@ -4,11 +4,13 @@ from cooper.work.planner_plugin import PlannerPlugin
 from cooper.work.executor_plugin import ExecutorPlugin
 from cooper.work.critic_plugin import CriticPlugin
 from cooper.work.responder_plugin import ResponderPlugin
+from cooper.work.research_plugin import ResearchPlugin
 
 def main():
     registry.register(PlannerPlugin())
     registry.register(CriticPlugin())
     registry.register(ExecutorPlugin())
+    registry.register(ResearchPlugin())
     registry.register(ResponderPlugin())
     run_shell()
 
