@@ -19,11 +19,17 @@ class ResponderPlugin(Plugin):
 
         if user_input.startswith("search "):
             query = user_input.replace("search ", "", 1)
+
             google_search(query)
+
             context["response"] = f"Searching Google for {query}."
+
             return context
 
-        response = answer_question(context["input"])
+        response = answer_question(
+            context["input"],
+            context.get("related_memories", [])
+        )
 
         context["response"] = response
 
