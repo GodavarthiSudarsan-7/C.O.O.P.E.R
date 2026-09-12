@@ -15,6 +15,7 @@ model = whisper.load_model("tiny")
 _speaking = False
 _stop_flag = False
 _lock = threading.Lock()
+_speak_lock = threading.Lock()
 
 
 def stop():
@@ -25,32 +26,32 @@ def stop():
     sd.stop()
 
 
-def speak(text: str):
+def speak(text: str, on_done=None):
     global _speaking, _stop_flag
     print(f"COOPER: {text}")
     stop()
 
     def run():
         global _speaking, _stop_flag
-        _stop_flag = False
-        _speaking = True
-
-        engine = pyttsx3.init(driverName="sapi5")
-        engine.setProperty("rate", 155)
-        engine.setProperty("volume", 1.0)
-        voices = engine.getProperty("voices")
-        engine.setProperty("voice", voices[0].id)
-
-        engine.say(text)
-
-        while engine.isBusy():
-            if _stop_flag:
+        # SAPI5's COM voice object must be created and used on the same
+        # thread, so each call gets its own engine here rather than
+        # sharing one across threads. _speak_lock serializes calls so
+        # two threads never touch the driver at the same time.
+        with _speak_lock:
+            _stop_flag = False
+            _speaking = True
+            try:
+                engine = pyttsx3.init(driverName="sapi5")
+                engine.setProperty("rate", 155)
+                engine.setProperty("volume", 1.0)
+                engine.setProperty("voice", engine.getProperty("voices")[0].id)
+                engine.say(text)
+                engine.runAndWait()
                 engine.stop()
-                break
-            engine.runAndWait()
-
-        engine.stop()
-        _speaking = False
+            finally:
+                _speaking = False
+                if on_done:
+                    on_done()
 
     threading.Thread(target=run, daemon=True).start()
 
